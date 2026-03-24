@@ -1,48 +1,49 @@
 package com.atruedev.bletoolkit
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import org.jetbrains.compose.resources.painterResource
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.atruedev.bletoolkit.detail.DeviceDetailScreen
+import com.atruedev.bletoolkit.detail.DeviceDetailViewModel
+import com.atruedev.bletoolkit.navigation.Screen
+import com.atruedev.bletoolkit.scanner.ScannerScreen
+import com.atruedev.bletoolkit.scanner.ScannerViewModel
+import com.atruedev.kmpble.scanner.Advertisement
+import kotlin.uuid.ExperimentalUuidApi
 
-import bletoolkit.composeapp.generated.resources.Res
-import bletoolkit.composeapp.generated.resources.compose_multiplatform
-
+@OptIn(ExperimentalUuidApi::class)
 @Composable
-@Preview
 fun App() {
     MaterialTheme {
-        var showContent by remember { mutableStateOf(false) }
-        Column(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.primaryContainer)
-                .safeContentPadding()
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Button(onClick = { showContent = !showContent }) {
-                Text("Click me!")
+        var currentScreen by remember { mutableStateOf<Screen>(Screen.Scanner) }
+
+        val scannerViewModel = viewModel { ScannerViewModel() }
+
+        when (val screen = currentScreen) {
+            is Screen.Scanner -> {
+                ScannerScreen(
+                    viewModel = scannerViewModel,
+                    onDeviceSelected = { advertisement ->
+                        scannerViewModel.stopScan()
+                        currentScreen = Screen.DeviceDetail(advertisement)
+                    },
+                )
             }
-            AnimatedVisibility(showContent) {
-                val greeting = remember { Greeting().greet() }
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $greeting")
+            is Screen.DeviceDetail -> {
+                val detailViewModel = remember(screen.advertisement.identifier) {
+                    DeviceDetailViewModel(screen.advertisement)
                 }
+                DeviceDetailScreen(
+                    viewModel = detailViewModel,
+                    onBack = {
+                        currentScreen = Screen.Scanner
+                    },
+                )
             }
         }
     }
