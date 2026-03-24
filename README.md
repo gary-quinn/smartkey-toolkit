@@ -1,35 +1,34 @@
-This is a Kotlin Multiplatform project targeting Android, iOS.
+**BLE Toolkit** — A BLE utility app built entirely with [kmp-ble](https://github.com/gary-quinn/kmp-ble).
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-    folder is the appropriate location.
+BLE Toolkit is an open-source Kotlin Multiplatform app (Android + iOS) that provides a full-featured BLE scanner and GATT explorer. It serves as both a practical BLE utility and a reference implementation for the kmp-ble library.
 
-* [/iosApp](./iosApp/iosApp) contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+## Features
 
-### Build and Run Android Application
+- **Scanner** — Scan for nearby BLE devices with real-time RSSI updates, name/signal filtering, and automatic device categorization
+- **GATT Explorer** — Connect to devices, browse services and characteristics, read/write values, and subscribe to notifications
+- **Cross-platform** — Shared UI via Compose Multiplatform, runs on Android and iOS from a single codebase
 
-To build and run the development version of the Android app, use the run configuration from the run widget
-in your IDE’s toolbar or build it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:assembleDebug
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:assembleDebug
-  ```
+TODO: add screenshots after Phase 1
 
-### Build and Run iOS Application
+## Build
 
-To build and run the development version of the iOS app, use the run configuration from the run widget
-in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
+**Android:**
+```bash
+./gradlew assembleDebug
+```
 
----
+**iOS:**
+Open `iosApp/iosApp.xcodeproj` in Xcode, select a physical device target, and run.
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+> BLE requires a physical device — simulators/emulators do not support Bluetooth.
+
+## Architecture
+
+- Kotlin Multiplatform + Compose Multiplatform for shared UI
+- [kmp-ble](https://github.com/gary-quinn/kmp-ble) for all BLE operations
+- MVVM with StateFlow-based reactive state
+- Structured concurrency with lifecycle-scoped coroutines
+
+## License
+
+See [LICENSE](LICENSE) for details.
