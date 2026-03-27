@@ -3,7 +3,7 @@ package com.atruedev.bletoolkit.detail
 object ValueFormatter {
 
     fun format(data: ByteArray, format: DisplayFormat): String = when (format) {
-        DisplayFormat.HEX -> data.toHexString()
+        DisplayFormat.HEX -> formatHex(data)
         DisplayFormat.UTF8 -> data.decodeToString()
         DisplayFormat.DECIMAL -> data.joinToString(" ") { (it.toInt() and 0xFF).toString() }
         DisplayFormat.BINARY -> data.joinToString(" ") {
@@ -11,11 +11,10 @@ object ValueFormatter {
         }
     }
 
-    fun formatHex(data: ByteArray): String = data.toHexString()
+    fun formatHex(data: ByteArray): String =
+        data.joinToString(" ") { (it.toInt() and 0xFF).toString(16).padStart(2, '0').uppercase() }
 
-    fun parseHex(input: String): ByteArray? = parseHexInput(input)
-
-    fun parseHexInput(input: String): ByteArray? {
+    fun parseHex(input: String): ByteArray? {
         val cleaned = input.replace(" ", "").replace(":", "").replace("-", "")
         if (cleaned.length % 2 != 0) return null
         return try {
@@ -24,7 +23,4 @@ object ValueFormatter {
             null
         }
     }
-
-    private fun ByteArray.toHexString(): String =
-        joinToString(" ") { (it.toInt() and 0xFF).toString(16).padStart(2, '0').uppercase() }
 }

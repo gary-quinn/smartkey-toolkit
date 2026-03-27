@@ -36,8 +36,8 @@ class ValueFormatterTest {
     }
 
     @Test
-    fun parseHexInputValid() {
-        val result = ValueFormatter.parseHexInput("01 FF A3")
+    fun parseHexValid() {
+        val result = ValueFormatter.parseHex("01 FF A3")
         assertNotNull(result)
         assertEquals(3, result.size)
         assertEquals(0x01.toByte(), result[0])
@@ -46,28 +46,28 @@ class ValueFormatterTest {
     }
 
     @Test
-    fun parseHexInputWithoutSpaces() {
-        val result = ValueFormatter.parseHexInput("01FFA3")
+    fun parseHexWithoutSpaces() {
+        val result = ValueFormatter.parseHex("01FFA3")
         assertNotNull(result)
         assertEquals(3, result.size)
     }
 
     @Test
-    fun parseHexInputWithColons() {
-        val result = ValueFormatter.parseHexInput("01:FF:A3")
+    fun parseHexWithColons() {
+        val result = ValueFormatter.parseHex("01:FF:A3")
         assertNotNull(result)
         assertEquals(3, result.size)
     }
 
     @Test
-    fun parseHexInputInvalidReturnsNull() {
-        val result = ValueFormatter.parseHexInput("GG")
+    fun parseHexInvalidReturnsNull() {
+        val result = ValueFormatter.parseHex("GG")
         assertNull(result)
     }
 
     @Test
-    fun parseHexInputOddLengthReturnsNull() {
-        val result = ValueFormatter.parseHexInput("01F")
+    fun parseHexOddLengthReturnsNull() {
+        val result = ValueFormatter.parseHex("01F")
         assertNull(result)
     }
 
