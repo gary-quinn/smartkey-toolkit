@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.atruedev.bletoolkit.detail.bonding.BondingSection
 import com.atruedev.kmpble.bonding.BondState
 import com.atruedev.kmpble.connection.State
 import kotlin.uuid.ExperimentalUuidApi
@@ -137,6 +138,15 @@ fun DeviceDetailScreen(
 
             when (state.connectionState) {
                 is State.Connected -> {
+                    BondingSection(
+                        bondState = state.bondState,
+                        selectedRecipe = state.selectedRecipe,
+                        onPair = viewModel::pair,
+                        onRemoveBond = viewModel::removeBond,
+                        onSelectRecipe = viewModel::selectRecipe,
+                        onConnectWithRecipe = viewModel::connectWithRecipe,
+                    )
+
                     ServiceList(
                         services = state.services,
                         onToggleService = viewModel::toggleService,

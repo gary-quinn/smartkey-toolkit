@@ -1,5 +1,6 @@
 package com.atruedev.bletoolkit.detail
 
+import com.atruedev.bletoolkit.detail.bonding.ConnectionRecipeType
 import com.atruedev.kmpble.bonding.BondState
 import com.atruedev.kmpble.connection.State
 import com.atruedev.kmpble.gatt.Characteristic
@@ -104,4 +105,5 @@ data class DeviceDetailUiState(
     val services: List<ServiceUiModel> = emptyList(),
     val error: String? = null,
     val writeDialogTarget: CharacteristicUiModel? = null,
+    val selectedRecipe: ConnectionRecipeType? = null,
 )
