@@ -59,6 +59,15 @@ internal fun GattServerScreen(viewModel: GattServerViewModel) {
             }
         }
 
+        if (state.state is ServerState.Running) {
+            Text(
+                "Server is hosting services. Start advertising below so other devices can discover it.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 8.dp),
+            )
+        }
+
         Spacer(modifier = Modifier.height(8.dp))
 
         state.services.forEachIndexed { serviceIndex, service ->
@@ -149,7 +158,7 @@ private fun ServiceConfigCard(
                 OutlinedTextField(
                     value = char.uuid,
                     onValueChange = { onCharUuidChange(charIndex, it) },
-                    label = { Text("Char ${charIndex + 1} UUID") },
+                    label = { Text(char.label.ifEmpty { "Char ${charIndex + 1} UUID" }) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     enabled = enabled,
