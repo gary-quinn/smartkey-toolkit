@@ -46,6 +46,18 @@ internal fun GattServerScreen(viewModel: GattServerViewModel) {
             )
         }
 
+        if (state.state is ServerState.Stopped && state.services.isEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text("Quick Start", style = MaterialTheme.typography.labelMedium)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ServerPreset.entries.forEach { preset ->
+                    OutlinedButton(onClick = { viewModel.loadPreset(preset) }) {
+                        Text(preset.label, style = MaterialTheme.typography.labelSmall)
+                    }
+                }
+            }
+        }
+
         Spacer(modifier = Modifier.height(8.dp))
 
         state.services.forEachIndexed { serviceIndex, service ->
