@@ -23,6 +23,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,6 +34,12 @@ import kotlin.uuid.ExperimentalUuidApi
 
 @OptIn(ExperimentalUuidApi::class, com.atruedev.kmpble.ExperimentalBleApi::class)
 class DeviceDetailViewModel(advertisement: Advertisement) : ViewModel() {
+
+    private companion object {
+        val GATT_OPERATION_TIMEOUT = 10.seconds
+        const val MTU_MIN = 23
+        const val MTU_MAX = 517
+    }
 
     private val peripheral: Peripheral = advertisement.toPeripheral()
 
@@ -128,7 +135,7 @@ class DeviceDetailViewModel(advertisement: Advertisement) : ViewModel() {
     private fun discoverServices() {
         viewModelScope.launch {
             try {
-                val services = peripheral.refreshServices()
+                val services = withTimeout(GATT_OPERATION_TIMEOUT) { peripheral.refreshServices() }
                 val serviceModels = services.map { service ->
                     val characteristics = service.characteristics.map { char ->
                         val descriptors = char.descriptors.map { desc ->
@@ -175,7 +182,7 @@ class DeviceDetailViewModel(advertisement: Advertisement) : ViewModel() {
             var consecutiveFailures = 0
             while (currentCoroutineContext()[Job]!!.isActive) {
                 try {
-                    val rssi = peripheral.readRssi()
+                    val rssi = withTimeout(GATT_OPERATION_TIMEOUT) { peripheral.readRssi() }
                     _uiState.update { it.copy(rssi = rssi) }
                     consecutiveFailures = 0
                 } catch (e: CancellationException) {
@@ -194,9 +201,10 @@ class DeviceDetailViewModel(advertisement: Advertisement) : ViewModel() {
     }
 
     fun requestMtu(mtu: Int) {
+        require(mtu in MTU_MIN..MTU_MAX) { "MTU must be between $MTU_MIN and $MTU_MAX" }
         viewModelScope.launch {
             try {
-                val negotiated = peripheral.requestMtu(mtu)
+                val negotiated = withTimeout(GATT_OPERATION_TIMEOUT) { peripheral.requestMtu(mtu) }
                 _uiState.update { it.copy(mtu = negotiated) }
             } catch (e: CancellationException) {
                 throw e
