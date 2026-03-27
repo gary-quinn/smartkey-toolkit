@@ -60,7 +60,7 @@ internal fun WriteDialog(
         confirmButton = {
             TextButton(onClick = {
                 val data = if (isHexMode) {
-                    val parsed = ValueFormatter.parseHexInput(inputText)
+                    val parsed = ValueFormatter.parseHex(inputText)
                     if (parsed == null) {
                         parseError = "Invalid hex format"
                         return@TextButton

@@ -20,7 +20,8 @@ internal class BondingOperations(
         scope.launch {
             try {
                 _uiState.update { it.copy(error = null) }
-                peripheral.connect(connectionOptionsForRecipe(ConnectionRecipeType.MEDICAL))
+                val recipe = _uiState.value.selectedRecipe ?: ConnectionRecipeType.CONSUMER
+                peripheral.connect(connectionOptionsForRecipe(recipe))
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {

@@ -20,6 +20,10 @@ class GattServerViewModel : ViewModel() {
 
     private var server: GattServer? = null
 
+    fun loadPreset(preset: ServerPreset) {
+        _uiState.update { it.copy(services = preset.services) }
+    }
+
     fun addService() {
         _uiState.update { state ->
             val services = state.services + ServerServiceConfig(

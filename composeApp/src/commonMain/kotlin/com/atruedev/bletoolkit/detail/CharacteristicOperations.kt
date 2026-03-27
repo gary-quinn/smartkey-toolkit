@@ -9,7 +9,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.ExperimentalUuidApi
 
 @OptIn(ExperimentalUuidApi::class)
@@ -22,6 +24,7 @@ internal class CharacteristicOperations(
 
     private companion object {
         const val MAX_NOTIFICATION_VALUES = 50
+        val GATT_OPERATION_TIMEOUT = 10.seconds
     }
 
     fun toggleService(serviceIndex: Int) {
@@ -49,7 +52,7 @@ internal class CharacteristicOperations(
         val char = _uiState.value.services[serviceIndex].characteristics[charIndex]
         scope.launch {
             try {
-                val value = peripheral.read(char.characteristic)
+                val value = withTimeout(GATT_OPERATION_TIMEOUT) { peripheral.read(char.characteristic) }
                 updateCharacteristic(serviceIndex, charIndex) {
                     it.copy(lastReadValue = value, error = null)
                 }
@@ -81,7 +84,7 @@ internal class CharacteristicOperations(
         val char = _uiState.value.services[serviceIndex].characteristics[charIndex]
         scope.launch {
             try {
-                peripheral.write(char.characteristic, data, writeType)
+                withTimeout(GATT_OPERATION_TIMEOUT) { peripheral.write(char.characteristic, data, writeType) }
                 updateCharacteristic(serviceIndex, charIndex) {
                     it.copy(lastReadValue = data, error = null)
                 }

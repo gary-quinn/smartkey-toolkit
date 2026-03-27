@@ -4,7 +4,7 @@ import com.atruedev.kmpble.dfu.firmware.FirmwarePackage
 
 object FirmwareDetector {
 
-    fun detect(name: String, bytes: ByteArray): DetectionResult {
+    internal fun detect(name: String, bytes: ByteArray): DetectionResult {
         if (name.endsWith(".zip", ignoreCase = true)) {
             return DetectionResult(
                 firmware = FirmwarePackage.Nordic.fromZipBytes(bytes),
@@ -26,7 +26,7 @@ object FirmwareDetector {
     }
 }
 
-data class DetectionResult internal constructor(
+internal data class DetectionResult(
     val firmware: FirmwarePackage,
     val info: FirmwareInfo,
 )
