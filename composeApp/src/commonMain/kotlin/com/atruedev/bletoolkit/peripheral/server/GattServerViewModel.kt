@@ -3,8 +3,6 @@ package com.atruedev.bletoolkit.peripheral.server
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.atruedev.kmpble.BleData
-import com.atruedev.kmpble.server.AdvertiseConfig
-import com.atruedev.kmpble.server.Advertiser
 import com.atruedev.kmpble.server.GattServer
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +20,6 @@ class GattServerViewModel : ViewModel() {
     val uiState: StateFlow<GattServerUiState> = _uiState.asStateFlow()
 
     private var server: GattServer? = null
-    private val advertiser = Advertiser()
 
     fun loadPreset(preset: ServerPreset) {
         _uiState.update { it.copy(services = preset.services) }
@@ -78,8 +75,8 @@ class GattServerViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val configs = _uiState.value.services
-                val serviceUuids = configs.map { Uuid.parse(it.uuid) }
 
+                server?.close()
                 val gattServer = GattServer {
                     configs.forEach { serviceConfig ->
                         service(Uuid.parse(serviceConfig.uuid)) {
@@ -95,7 +92,7 @@ class GattServerViewModel : ViewModel() {
                                         write = CharProperty.WRITE in charConfig.properties
                                     }
                                     if (CharProperty.READ in charConfig.properties) {
-                                        onRead { _ -> BleData(byteArrayOf(0x00)) }
+                                        onRead { _ -> BleData(charConfig.readValue) }
                                     }
                                 }
                             }
@@ -104,15 +101,6 @@ class GattServerViewModel : ViewModel() {
                 }
                 gattServer.open()
                 server = gattServer
-
-                // Advertise service UUIDs so other devices can discover this server
-                advertiser.startAdvertising(
-                    AdvertiseConfig(
-                        serviceUuids = serviceUuids,
-                        connectable = true,
-                    ),
-                )
-
                 _uiState.update { it.copy(state = ServerState.Running, error = null) }
             } catch (e: CancellationException) {
                 throw e
@@ -124,13 +112,6 @@ class GattServerViewModel : ViewModel() {
     }
 
     fun stopServer() {
-        viewModelScope.launch {
-            try {
-                advertiser.stopAdvertising()
-            } catch (_: Exception) {
-                // Stop errors are non-critical
-            }
-        }
         server?.close()
         server = null
         _uiState.update { it.copy(state = ServerState.Stopped, error = null) }
@@ -153,7 +134,6 @@ class GattServerViewModel : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
-        advertiser.close()
         server?.close()
     }
 }

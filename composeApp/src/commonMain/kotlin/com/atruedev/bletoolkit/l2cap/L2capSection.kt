@@ -3,6 +3,8 @@ package com.atruedev.bletoolkit.l2cap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +20,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.material3.FilterChip
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,9 +70,29 @@ internal fun L2capSection(
     }
 }
 
+private enum class PsmPreset(val label: String, val psm: Int) {
+    CoC(label = "CoC (128)", psm = 128),
+    DFU(label = "DFU (192)", psm = 192),
+    Custom(label = "Custom", psm = 0),
+}
+
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ClosedContent(onOpenChannel: (Int) -> Unit) {
-    var psmText by remember { mutableStateOf("") }
+    var psmText by remember { mutableStateOf("128") }
+
+    Text("Common PSMs", style = MaterialTheme.typography.labelSmall)
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        PsmPreset.entries.filter { it != PsmPreset.Custom }.forEach { preset ->
+            FilterChip(
+                selected = psmText == preset.psm.toString(),
+                onClick = { psmText = preset.psm.toString() },
+                label = { Text(preset.label) },
+            )
+        }
+    }
+
+    Spacer(modifier = Modifier.height(4.dp))
 
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         OutlinedTextField(

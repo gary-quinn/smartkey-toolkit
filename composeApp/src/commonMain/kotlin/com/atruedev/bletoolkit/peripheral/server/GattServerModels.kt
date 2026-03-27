@@ -10,9 +10,25 @@ enum class CharProperty { READ, WRITE, NOTIFY }
 
 data class ServerCharConfig(
     val uuid: String = "",
+    val label: String = "",
     val properties: Set<CharProperty> = emptySet(),
-    val initialValue: String = "",
-)
+    val readValue: ByteArray = byteArrayOf(),
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is ServerCharConfig) return false
+        return uuid == other.uuid && label == other.label &&
+            properties == other.properties && readValue.contentEquals(other.readValue)
+    }
+
+    override fun hashCode(): Int {
+        var result = uuid.hashCode()
+        result = 31 * result + label.hashCode()
+        result = 31 * result + properties.hashCode()
+        result = 31 * result + readValue.contentHashCode()
+        return result
+    }
+}
 
 data class ServerServiceConfig(
     val uuid: String = "",
@@ -38,11 +54,15 @@ enum class ServerPreset(
                 characteristics = listOf(
                     ServerCharConfig(
                         uuid = "00002a37-0000-1000-8000-00805f9b34fb",
-                        properties = setOf(CharProperty.NOTIFY),
+                        label = "Heart Rate Measurement",
+                        properties = setOf(CharProperty.READ, CharProperty.NOTIFY),
+                        readValue = byteArrayOf(0x00, 72), // flags=0, bpm=72
                     ),
                     ServerCharConfig(
                         uuid = "00002a38-0000-1000-8000-00805f9b34fb",
+                        label = "Body Sensor Location",
                         properties = setOf(CharProperty.READ),
+                        readValue = byteArrayOf(0x01), // 1 = Chest
                     ),
                 ),
             ),
@@ -56,7 +76,9 @@ enum class ServerPreset(
                 characteristics = listOf(
                     ServerCharConfig(
                         uuid = "00002a19-0000-1000-8000-00805f9b34fb",
+                        label = "Battery Level",
                         properties = setOf(CharProperty.READ, CharProperty.NOTIFY),
+                        readValue = byteArrayOf(85), // 85%
                     ),
                 ),
             ),
@@ -70,10 +92,12 @@ enum class ServerPreset(
                 characteristics = listOf(
                     ServerCharConfig(
                         uuid = "6e400002-b5a3-f393-e0a9-e50e24dcca9e",
+                        label = "RX (Write)",
                         properties = setOf(CharProperty.WRITE),
                     ),
                     ServerCharConfig(
                         uuid = "6e400003-b5a3-f393-e0a9-e50e24dcca9e",
+                        label = "TX (Notify)",
                         properties = setOf(CharProperty.NOTIFY),
                     ),
                 ),
@@ -88,11 +112,15 @@ enum class ServerPreset(
                 characteristics = listOf(
                     ServerCharConfig(
                         uuid = "00002a29-0000-1000-8000-00805f9b34fb",
+                        label = "Manufacturer Name",
                         properties = setOf(CharProperty.READ),
+                        readValue = "BLE Toolkit".encodeToByteArray(),
                     ),
                     ServerCharConfig(
                         uuid = "00002a24-0000-1000-8000-00805f9b34fb",
+                        label = "Model Number",
                         properties = setOf(CharProperty.READ),
+                        readValue = "v1.0".encodeToByteArray(),
                     ),
                 ),
             ),
